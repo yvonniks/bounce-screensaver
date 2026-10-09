@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Corner Hunter</title>
+<meta name="description" content="A bouncing logo screensaver that actually hits the corner.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 273 273'%3E%3Crect width='273' height='273' rx='32' fill='%231C1A1B'/%3E%3Cpath fill='%239FF5F5' d='M93 123 120 96Q135 84 150 96L210 153 195 168Q175 190 155 170L108 124Q100 120 93 123Z M70 181 106 145C96 135 80 135 71 143 60 152 58 168 70 181Z'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#9ff5f5">
+<script>
+  // set theme before first paint: saved choice wins, otherwise follow the OS
+  (() => {
+    let t = null;
+    try { t = localStorage.getItem("theme"); } catch (e) {}
+    if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    document.documentElement.dataset.theme = t;
+  })();
+</script>
+<style>
+  @property --trail-a { syntax: "<color>"; inherits: true; initial-value: transparent; }
+  @property --trail-b { syntax: "<color>"; inherits: true; initial-value: transparent; }
+  :root {
+    --bg: #9ff5f5;
+    --head: #1a1618;
+    --logo: #9cf5f5;
+    --trail-a: rgba(221, 216, 220, 0.55);
+    --trail-b: rgba(26, 22, 24, 0.3);
+    --flash: #fff;
+    --ink: #1a1618;
+    --ui: rgba(28, 26, 27, 0.55);
+    --btn-bg: rgba(255, 255, 255, 0.35);
+    --btn-bg-hover: rgba(255, 255, 255, 0.6);
+    --btn-border: rgba(28, 26, 27, 0.25);
+  }
+  :root[data-theme="dark"] {
+    --bg: #1a1618;
+    --head: #9cf5f5;
+    --logo: #000;
+    --trail-a: rgba(221, 216, 220, 0.34);
+    --trail-b: rgba(221, 216, 220, 0.05);
+    --flash: #9cf5f5;
+    --ink: #9cf5f5;
+    --ui: rgba(221, 216, 220, 0.6);
+    --btn-bg: rgba(255, 255, 255, 0.07);
+    --btn-bg-hover: rgba(255, 255, 255, 0.16);
+    --btn-border: rgba(221, 216, 220, 0.25);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    transition: background-color 400ms ease;
+  }
+  body { font: 500 12px/1 ui-monospace, "SF Mono", Menlo, monospace; }
+  body.idle { cursor: none; }
+
+  #stage { position: fixed; inset: 0; background: var(--bg); transition: background-color 400ms ease; }
+  #flash {
+    position: absolute; inset: 0; background: var(--flash); opacity: 0; pointer-events: none;
+  }
+  #flash.go { animation: pulse 700ms ease-out; }
+  @keyframes pulse { 0% { opacity: 0.75; } 100% { opacity: 0; } }
+  :root[data-theme="dark"] #flash.go { animation-name: pulse-dark; }
+  @keyframes pulse-dark { 0% { opacity: 0.3; } 100% { opacity: 0; } }
+
+  .sq {
+    position: absolute; left: 0; top: 0;
+    will-change: transform;
+    border-radius: 11.6%;
+  }
+  .trail {
+    background: linear-gradient(to bottom, var(--trail-a), var(--trail-b));
+    transition: --trail-a 400ms ease, --trail-b 400ms ease;
+  }
+  .head { background: var(--head); transition: background-color 400ms ease; }
+  .head svg { display: block; width: 100%; height: 100%; }
+  .head path { fill: var(--logo); transition: fill 400ms ease; }
+
+  .ui {
+    position: fixed; bottom: 16px; display: flex; align-items: center; gap: 8px;
+    color: var(--ui); transition: opacity 400ms ease; z-index: 5;
+  }
+  body.idle .ui { opacity: 0; pointer-events: none; }
+  #count { left: 16px; }
+  #fs { right: 16px; }
+  #count { transition: opacity 400ms ease, color 400ms ease; }
+  button {
+    font: inherit; color: inherit; background: var(--btn-bg);
+    border: 1px solid var(--btn-border); border-radius: 999px;
+    padding: 9px 14px; cursor: pointer;
+    transition: background-color 400ms ease, border-color 400ms ease;
+  }
+  button:hover { background: var(--btn-bg-hover); }
+  @media (max-width: 480px) {
+    #count { bottom: auto; top: 16px; }
+  }
+  button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<div id="stage" aria-hidden="true">
+  <div class="sq trail"></div>
+  <div class="sq trail"></div>
+  <div class="sq trail"></div>
+  <div class="sq trail"></div>
+  <div class="sq head">
+    <svg viewBox="0 0 517.222 517.222" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+      <path d="M221.927 186.465C240.599 167.722 270.9 167.722 289.571 186.465L398.692 295.961L364.03 330.758C345.358 349.501 315.057 349.501 296.386 330.758L221.2 255.282C219.883 253.96 218.475 252.728 217.021 251.588C210.797 246.161 203.801 241.692 196.124 238.5C189.445 235.718 182.54 233.939 175.453 233.119L221.927 186.465Z"/>
+      <path d="M122.21 327.968C124.663 333.805 128.207 339.096 132.659 343.565L200.257 275.705C195.805 271.191 190.536 267.633 184.721 265.216C178.951 262.799 172.727 261.522 166.413 261.522C160.098 261.522 153.874 262.754 148.059 265.171C142.244 267.542 136.975 271.099 132.522 275.569C128.116 280.038 124.572 285.328 122.165 291.165C119.757 297.003 118.53 303.251 118.53 309.59C118.53 315.929 119.802 322.176 122.21 327.968Z"/>
+    </svg>
+  </div>
+  <div id="flash"></div>
+</div>
+
+<div class="ui" id="count" role="status" aria-live="off">corner hits: <span id="n">0</span></div>
+<div class="ui" id="fs">
+  <button id="themebtn" type="button" title="Switch theme (T)">Dark</button>
+  <button id="fsbtn" type="button">Fullscreen</button>
+</div>
+
+<script>
+(() => {
+  // Path: x and y are triangle waves whose frequencies are the coprime
+  // integers A:B (in units of Wt/loop and Ht/loop). Both waves sit at 0 or 1
+  // only on integer phases, so the head hits a corner exactly once per loop.
+  const A = 7, B = 5;
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const LOOP_SECONDS = reduced ? 90 : 30;
+  const TRAIL_COUNT = 4;
+  const SIZE_RATIO = 0.2;
+  const GAP_RATIO = 0.3;   // trail spacing along the path, in head widths
+
+  const tri = p => { const m = ((p % 2) + 2) % 2; return m > 1 ? 2 - m : m; };
+
+  const els = [...document.querySelectorAll(".sq")];
+  const trail = els.slice(0, TRAIL_COUNT);
+  const head = els[TRAIL_COUNT];
+  const flash = document.getElementById("flash");
+  const nEl = document.getElementById("n");
+
+  let W, H, s, Wt, Ht, lagPhase;
+  let phase = 0, hits = 0, last = performance.now();
+
+  function layout() {
+    W = innerWidth; H = innerHeight;
+    s = Math.round(Math.min(W, H) * SIZE_RATIO);
+    Wt = W - s; Ht = H - s;
+    const pathPerLoop = Math.hypot(A * Wt, B * Ht);
+    lagPhase = (GAP_RATIO * s) / pathPerLoop;
+    for (const el of els) { el.style.width = el.style.height = s + "px"; }
+  }
+
+  const posAt = p => ({ x: tri(A * p) * Wt, y: tri(B * p) * Ht });
+
+  function place(el, p, alpha) {
+    const { x, y } = posAt(p);
+    // whole pixels only: fractional translates make the GPU layer resample and blur the edges
+    el.style.transform = `translate3d(${Math.round(x)}px,${Math.round(y)}px,0)`;
+    if (alpha !== undefined) el.style.opacity = alpha;
+  }
+
+  function render() {
+    // tail first in DOM order, so index 0 is the oldest square
+    for (let k = 0; k < TRAIL_COUNT; k++) {
+      const age = TRAIL_COUNT - k;
+      place(trail[k], phase - age * lagPhase, 0.18 + 0.82 * (k + 1) / (TRAIL_COUNT + 1));
+    }
+    place(head, phase);
+  }
+
+  function cornerHit() {
+    hits++;
+    nEl.textContent = hits;
+    flash.classList.remove("go");
+    void flash.offsetWidth;
+    flash.classList.add("go");
+  }
+
+  function frame(now) {
+    const dt = Math.min((now - last) / 1000, 0.1);
+    last = now;
+    const before = Math.floor(phase);
+    phase += dt / LOOP_SECONDS;
+    if (Math.floor(phase) > before) cornerHit();
+    render();
+    requestAnimationFrame(frame);
+  }
+
+  addEventListener("resize", () => { layout(); render(); });
+  layout(); render();
+  requestAnimationFrame(frame);
+
+  // idle UI fade
+  let idleTimer;
+  const wake = () => {
+    document.body.classList.remove("idle");
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => document.body.classList.add("idle"), 3000);
+  };
+  ["mousemove", "mousedown", "keydown", "touchstart"].forEach(e => addEventListener(e, wake, { passive: true }));
+  wake();
+
+  // theme toggle
+  const themeBtn = document.getElementById("themebtn");
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+  const applyTheme = t => {
+    document.documentElement.dataset.theme = t;
+    themeBtn.textContent = t === "dark" ? "Light" : "Dark";
+    themeMeta.content = t === "dark" ? "#1a1618" : "#9ff5f5";
+  };
+  applyTheme(document.documentElement.dataset.theme);
+  const toggleTheme = () => {
+    const t = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    applyTheme(t);
+    try { localStorage.setItem("theme", t); } catch (e) {}
+  };
+  themeBtn.addEventListener("click", toggleTheme);
+  addEventListener("keydown", e => {
+    if ((e.key === "t" || e.key === "T") && !e.metaKey && !e.ctrlKey && !e.altKey) toggleTheme();
+  });
+
+  // fullscreen
+  const btn = document.getElementById("fsbtn");
+  const root = document.documentElement;
+  if (!root.requestFullscreen) btn.hidden = true;
+  btn.addEventListener("click", () => {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else root.requestFullscreen().catch(() => {});
+  });
+  document.addEventListener("fullscreenchange", () => {
+    btn.textContent = document.fullscreenElement ? "Exit fullscreen" : "Fullscreen";
+  });
+
+  // small hook for checking the math from the console
+  window.__bounce = {
+    A, B,
+    get dims() { return { W, H, s, Wt, Ht }; },
+    get hits() { return hits; },
+    posAt,
+    jump(p) { phase = p; render(); }
+  };
+})();
+</script>
+</body>
+</html>
